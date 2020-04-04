@@ -2067,7 +2067,25 @@ double do_md(FILE *fplog, t_commrec *cr, int nfile, const t_filenm fnm[],
                                     nrnb, wcycle, FALSE);
             }
         }
+//modification for hypersound irradiation
+        bExchanged = FALSE;
+        int cyc_num = step/50;   //####### sets the N value (50) ########
+        int cyc_num2 = step%50;  //####### sets the N value (50) ########
+        if (cyc_num2==0)
+        {
+            velocity_exchange(cr, state_global, state, cyc_num);
 
+            if (DOMAINDECOMP(cr))
+            {
+                dd_partition_system(fplog, step, cr, TRUE, 1,
+                                    state_global, top_global, ir,
+                                    state, &f, mdatoms, top, fr,
+                                    vsite, shellfc, constr,
+                                    nrnb, wcycle, FALSE);
+            }
+        bExchanged = TRUE;
+        }
+//end of modification for hypersound irradiation
         bFirstStep       = FALSE;
         bInitStep        = FALSE;
         bStartingFromCpt = FALSE;
