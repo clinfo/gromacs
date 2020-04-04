@@ -1392,7 +1392,143 @@ gmx_bool replica_exchange(FILE *fplog, const t_commrec *cr, struct gmx_repl_ex *
 
     return bThisReplicaExchanged;
 }
+//modification for hypersound irradiation
+void velocity_exchange(const t_commrec *cr, t_state *state, t_state *state_local, int cyc_num)
+{
+	int j=cyc_num/80; //corresponding to the irradiation time of each shock wave (80N)
+	int k=cyc_num/480; //corresponding to the irradiation time of a set of shock waves in the six directions (480N)
+	int l=j-6*k; //swiching of shock waves (0->+X, 1->+Y, 2->+Z, 3->-X, 4->-Y, 5->-Z)
+	int wat_id=6549;   //####### sets the starting atom number for solvent atoms ########
+	float box_len=8.4; //####### sets the side length of a cubic box (nm) ########
 
+        if (PAR(cr))
+        {
+            /* Collect the global state on the master node */
+            if (DOMAINDECOMP(cr))
+            {
+                dd_collect_state(cr->dd, state_local, state);
+            }
+            else
+            {
+                pd_collect_state(cr, state);
+            }
+        }
+        else
+        {
+            copy_state_nonatomdata(state_local, state);
+        }
+
+        if (MASTER(cr))
+        {
+	  if (k%6 ==0)  //####### sets time intervals between shock wave generation (Tint). In this case, Tint = 6 * 480N -480N = 2400N  ########
+	  {
+	    switch (l){
+		case 0:
+		    sound_x1(state, cyc_num, wat_id, box_len);
+		    break;
+                case 1:
+                    sound_y1(state, cyc_num, wat_id, box_len);
+                    break;
+                case 2:
+                    sound_z1(state, cyc_num, wat_id, box_len);
+                    break;
+                case 3:
+                    sound_x2(state, cyc_num, wat_id, box_len);
+                    break;
+                case 4:
+                    sound_y2(state, cyc_num, wat_id, box_len);
+                    break;
+                case 5:
+                    sound_z2(state, cyc_num, wat_id, box_len);
+                    break;
+	    }
+	  }
+        }
+
+        /* With domain decomposition the global state is distributed later */
+        if (!DOMAINDECOMP(cr))
+        {
+            /* Copy the global state to the local state data structure */
+            copy_state_nonatomdata(state, state_local);
+
+            if (PAR(cr))
+            {
+                bcast_state(cr, state, FALSE);
+            }
+        }
+
+}
+
+void sound_x1(t_state *state, int cyc_num, int wat_id, float box_len)
+{
+    float coef=cos(cyc_num/16.0*6.28);
+    int i;
+//    fprintf(stderr, "natom=%d coef=%f\n", state->natoms, coef);
+    for (i = wat_id; i < state->natoms; i++){
+        if (state->x[i][0] >= 0 && state->x[i][0] <= 1){
+	    state->v[i][0]=state->v[i][0]+0.4*coef; //####### sets the maximum velocity (vmax) in the +X direction. (e.g. 0.4 km/s)  ########
+        }
+    }
+}
+
+void sound_x2(t_state *state, int cyc_num, int wat_id, float box_len)
+{
+    float coef=cos(cyc_num/16.0*6.28);
+    int i;
+    for (i = wat_id; i < state->natoms; i++){
+        if (state->x[i][0] >= box_len-1 && state->x[i][0] <= box_len){
+	    state->v[i][0]=state->v[i][0]-0.4*coef; //####### sets the maximum velocity (vmax) in the -X direction. (e.g. 0.4 km/s)  ########
+        }
+    }
+}
+
+
+void sound_y1(t_state *state, int cyc_num, int wat_id, float box_len)
+{
+    float coef=cos(cyc_num/16.0*6.28);
+    int i;
+    for (i = wat_id; i < state->natoms; i++){
+        if (state->x[i][1] >= 0 && state->x[i][1] <= 1){
+	    state->v[i][1]=state->v[i][1]+0.4*coef; //####### sets the maximum velocity (vmax) in the +Y direction. (e.g. 0.4 km/s)  ########
+        }
+    }
+}
+
+void sound_y2(t_state *state, int cyc_num, int wat_id, float box_len)
+{
+    float coef=cos(cyc_num/16.0*6.28);
+    int i;
+    for (i = wat_id; i < state->natoms; i++){
+        if (state->x[i][1] >= box_len-1 && state->x[i][1] <= box_len){
+	    state->v[i][1]=state->v[i][1]-0.4*coef; //####### sets the maximum velocity (vmax) in the -Y direction. (e.g. 0.4 km/s)  ########
+        }
+    }
+}
+
+
+void sound_z1(t_state *state, int cyc_num, int wat_id, float box_len)
+{
+    float coef=cos(cyc_num/16.0*6.28);
+    int i;
+    for (i = wat_id; i < state->natoms; i++){
+        if (state->x[i][2] >= 0 && state->x[i][2] <= 1){
+	    state->v[i][2]=state->v[i][2]+0.4*coef; //####### sets the maximum velocity (vmax) in the +Z direction. (e.g. 0.4 km/s)  ########
+        }
+    }
+}
+
+
+void sound_z2(t_state *state, int cyc_num, int wat_id, float box_len)
+{
+    float coef=cos(cyc_num/16.0*6.28);
+    int i;
+    for (i = wat_id; i < state->natoms; i++){
+        if (state->x[i][2] >= box_len-1 && state->x[i][2] <= box_len){
+	    state->v[i][2]=state->v[i][2]-0.4*coef; //####### sets the maximum velocity (vmax) in the -Z direction. (e.g. 0.4 km/s)  ########
+        }
+    }
+}
+//end of modification for hypersound irradiation
 void print_replica_exchange_statistics(FILE *fplog, struct gmx_repl_ex *re)
 {
     int  i;
