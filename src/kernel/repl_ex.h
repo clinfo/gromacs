@@ -66,7 +66,16 @@ extern gmx_bool replica_exchange(FILE *fplog,
  * With domain decomposition the global state after exchanged in stored
  * in state and still needs to be redistributed over the nodes.
  */
+//for hypersound
+extern void velocity_exchange(const t_commrec *cr, t_state *state, t_state *state_local, int cyc_num);
 
+extern void sound_x1(t_state *state, int cyc_num, int wat_id, float box_len);
+extern void sound_x2(t_state *state, int cyc_num, int wat_id, float box_len);
+extern void sound_y1(t_state *state, int cyc_num, int wat_id, float box_len);
+extern void sound_y2(t_state *state, int cyc_num, int wat_id, float box_len);
+extern void sound_z1(t_state *state, int cyc_num, int wat_id, float box_len);
+extern void sound_z2(t_state *state, int cyc_num, int wat_id, float box_len);
+//end hypersound
 extern void print_replica_exchange_statistics(FILE *fplog, gmx_repl_ex_t re);
 /* Should only be called on the master nodes */
 
