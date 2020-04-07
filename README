@@ -1,3 +1,69 @@
+How to compile the hypersound-perturbed MD program. 
+
+(i): Type “git clone https://github.com/clinfo/gromacs.git“ and change to “gromacs”.
+
+(ii): Type “git checkout hypersound”.
+
+(iii): Following three files (“md.c”, “repl_ex.c”, and “repl_ex.h”) have been modified to model hypersound shock waves irradiated to solvent molecules. Prior to compilation, you have to change the "N", "vmax", and "Tint" parameters, which are defined in Fig. S1, and "the starting atom number for solvent atoms" and "the side length of a cubic box" appropriate for your simulation system.
+
+<src/kernel/md.c>
+line2072, 2073: setting of the N value
+
+< src/kernel/repl_ex.c>
+line1401: setting of the starting atom number for solvent atoms [corresponding to “6549” in case of Ref.gro (CDK2-CS3 system)]
+line1402: setting of the side length of a cubic box (nm) [corresponding to “8.4” in case of Ref.gro (CDK2-CS3 system)]
+line1423: setting of time intervals between shock wave generation (Tint)
+line1469, 1480, 1492, 1503, 1515, 1527: setting of the maximum velocity (vmax)
+
+< src/kernel/repl_ex.h>
+
+(iv): Make a separate build directory (e.g. build_test), and change to it.
+
+(v): Run “cmake” with the path to the source as an argument.
+(e.g. cmake .. -DCMAKE_INSTALL_PREFIX=/home/apps/gromacs-4.6.5 -DGMX_MPI=OFF -DGMX_GPU=ON -DGMX_BUILD_OWN_FFTW=on -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-8.0)
+
+(vi): Change to “build_test/src/kernel” and type "make mdrun".
+
+(vii): You will see a binary file of “mdrun”, which can be used for the hypersound-perturbed MD simulation.
+### Ref.gro ###
+Protein in water
+60120
+    1MET      N    1   5.928   4.496   6.659
+    1MET     H1    2   5.927   4.588   6.702
+    1MET     H2    3   5.984   4.437   6.719
+    1MET     H3    4   5.975   4.505   6.570
+…
+
+  298LEU   HD21 4843   3.236   4.247   5.860
+  298LEU   HD22 4844   3.325   4.144   5.976
+  298LEU   HD23 4845   3.169   4.092   5.911
+  298LEU      C 4846   3.092   3.944   6.311
+  298LEU    OC1 4847   3.196   3.886   6.348
+  298LEU    OC2 4848   2.988   3.945   6.380
+  299LIG    CAI 4849   2.955   2.867   5.210
+  299LIG    CAJ 4850   3.036   2.757   5.272
+  299LIG    CAT 4851   2.985   2.869   5.357
+  299LIG    CAS 4852   2.882   2.838   5.457
+  299LIG    CAH 4853   2.778   2.753   5.439
+…
+348LIG    HAG 6545   5.047   5.729   1.508
+  348LIG    HAE 6546   4.851   5.604   1.574
+  348LIG   HAA1 6547   4.604   5.243   1.420
+  348LIG   HAA2 6548   4.702   5.291   1.284
+  349SOL     OW 6549   0.579   1.302   1.205
+  349SOL    HW1 6550   0.497   1.301   1.156
+  349SOL    HW2 6551   0.590   1.394   1.231
+  350SOL     OW 6552   1.585   1.512   0.709
+…
+18277CL      CL60117   7.781   4.706   5.494
+18278CL      CL60118   8.037   6.695   7.848
+18279CL      CL60119   8.326   7.422   6.107
+18280CL      CL60120   0.059   7.912   7.476
+   8.43544   8.43544   8.43544
+
+#######################################################################################################
+The following is the original GROMSCS README.
+#######################################################################################################
 
                Welcome to the official version of GROMACS!
 
