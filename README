@@ -4,7 +4,7 @@ How to compile the hypersound-perturbed MD program.
 
 (ii): Type “git checkout hypersound”.
 
-(iii): Following three files (“md.c”, “repl_ex.c”, and “repl_ex.h”) have been modified to model hypersound shock waves irradiated to solvent molecules. Prior to compilation, you have to change the "N", "vmax", and "Tint" parameters, which are defined in Fig. S1, and "the starting atom number for solvent atoms" and "the side length of a cubic box" appropriate for your simulation system.
+(iii): Following three files (“md.c”, “repl_ex.c”, and “repl_ex.h”) have been modified to model hypersound shock waves irradiated to solvent molecules. Prior to compilation, you have to change the "N", "vmax", and "Tint" parameters, which are defined in Fig. 1A, and "the starting atom number for solvent atoms" and "the side length of a cubic box" appropriate for your simulation system.
 
 <src/kernel/md.c>
 line2072, 2073: setting of the N value
